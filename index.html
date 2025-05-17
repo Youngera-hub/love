@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>情人节快乐</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #ff0066;
+            position: relative;
+            transition: background 1s;
+        }
+        .envelope {
+            width: 400px;
+            height: 300px;
+            background-color: #ff99cc;
+            border: 2px solid #ff0066;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.5s, box-shadow 0.5s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .envelope:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #ff99cc, #ff0066);
+            opacity: 0.5;
+        }
+        .envelope:hover {
+            transform: scale(1.1);
+        }
+        .cat-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background-color: #ff0066;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .cat-button:hover {
+            background-color: #ff99cc;
+        }
+        .letter {
+            display: none;
+            width: 400px;
+            height: 300px;
+            background: linear-gradient(135deg, #fff6b7 0%, #fbc2eb 100%);
+            border: 2px solid #ff0066;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+            border-radius: 16px;
+        }
+        .sakura {
+            position: absolute;
+            font-size: 20px;
+            animation: sakuraFall 5s linear infinite;
+            z-index: 0;
+        }
+        @keyframes sakuraFall {
+            0% { transform: translateY(-100vh); }
+            100% { transform: translateY(100vh); }
+        }
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background-color: #ff99cc;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            transition: transform 0.5s;
+        }
+        .envelope.open .envelope-flap {
+            transform: translateY(-100%);
+        }
+        .envelope-flap:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #ff99cc, #ff0066);
+            opacity: 0.5;
+        }
+        .show-bg {
+            background: url('cat_bg.jpg') center center/contain no-repeat fixed !important;
+            background-color: #fbc2eb; /* 添加背景色，防止图片未完全覆盖时的空白 */
+        }
+        .envelope.move {
+            transition: transform 0.7s cubic-bezier(.5,1.5,.5,1), box-shadow 0.7s;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+        }
+        .envelope, .letter {
+            z-index: 2;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <audio id="bgm" src="开往春天的地铁.aac" loop preload="auto"></audio>
+
+    <div class="envelope" id="envelope">
+        <div class="envelope-flap"></div>
+        <div class="cat-button" id="catButton">🐱</div>
+        <div class="letter" id="letter">
+            <h2>宋然天下第一好</h2>
+            <p>我是蛋蛋凯！宝宝，你的出现让我的生命有了意义</p>
+        </div>
+    </div>
+    <script>
+        let jumpCount = 0;
+        const jumpPositions = [
+            {x: -400, y: -200},
+            {x: 400, y: 200},
+            {x: -350, y: 250}
+        ];
+        const envelope = document.getElementById('envelope');
+        const catButton = document.getElementById('catButton');
+        const audio = document.getElementById('bgm');
+
+        // 添加音频错误处理
+        audio.addEventListener('error', function(e) {
+            console.error('音频加载错误:', e);
+        });
+
+        catButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            // 尝试播放音乐
+            audio.play().catch(function(error) {
+                console.error('音频播放失败:', error);
+            });
+
+            if (jumpCount < 3) {
+                envelope.classList.add('move');
+                const pos = jumpPositions[jumpCount];
+                envelope.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+                jumpCount++;
+            } else if (!envelope.classList.contains('open')) {
+                envelope.classList.remove('move');
+                envelope.style.transform = '';
+                envelope.classList.add('open');
+                setTimeout(() => {
+                    document.getElementById('letter').style.display = 'block';
+                    document.body.classList.add('show-bg');
+                }, 500);
+            }
+        });
+
+        // 增加樱花数量到150，初始top分布在整个上半屏，动画持续时间和延迟都随机
+        for (let i = 0; i < 150; i++) {
+            const sakura = document.createElement('div');
+            sakura.classList.add('sakura');
+            sakura.innerHTML = '🌸';
+            sakura.style.left = Math.random() * window.innerWidth + 'px';
+            sakura.style.top = (-Math.random() * window.innerHeight) + 'px';
+            const duration = 4 + Math.random() * 4; // 4~8秒
+            sakura.style.animationDuration = duration + 's';
+            sakura.style.animationDelay = (-Math.random() * duration) + 's'; // 负值让樱花更早下落
+            document.body.appendChild(sakura);
+        }
+
+        // 尽早开始播放音频
+        document.addEventListener('DOMContentLoaded', function() {
+            var audio = document.getElementById('bgm');
+            
+            // 添加错误处理
+            audio.addEventListener('error', function(e) {
+                console.error('音频加载错误:', e);
+            });
+
+            // 添加播放成功处理
+            audio.addEventListener('playing', function() {
+                console.log('音频开始播放');
+            });
+
+            // 尝试播放音频
+            function playAudio() {
+                var playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(function() {
+                        console.log('音频播放成功');
+                    }).catch(function(error) {
+                        console.error('音频播放失败:', error);
+                        // 如果自动播放失败，添加点击事件来触发播放
+                        document.body.addEventListener('click', function() {
+                            audio.play().catch(function(e) {
+                                console.error('点击播放失败:', e);
+                            });
+                        }, { once: true });
+                    });
+                }
+            }
+
+            // 立即尝试播放
+            playAudio();
+        });
+
+        window.onload = function() {
+            // 其他初始化代码...
+        };
+    </script>
+</body>
+</html> 
